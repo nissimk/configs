@@ -111,3 +111,31 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+
+
+parse_git_dirty () {
+  [[ $(git status 2> /dev/null | tail -n1) != "nothing to commit (working directory clean)" ]] && echo "*"
+}
+parse_git_branch () {
+  git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e "s/* \(.*\)/\1$(parse_git_dirty)/"
+}
+
+if tput setaf 1 &> /dev/null; then
+    tput sgr0
+    if [[ $(tput colors) -ge 256 ]] 2>/dev/null; then
+      BASE0=$(tput setaf 244)
+      YELLOW=$(tput setaf 136)
+      ORANGE=$(tput setaf 166)
+      RED=$(tput setaf 160)
+      MAGENTA=$(tput setaf 125)
+      VIOLET=$(tput setaf 61)
+      PURPLE=$(tput setaf 134)
+      CYAN=$(tput setaf 75)
+      GREEN=$(tput setaf 64)
+      RESET=$(tput sgr0)
+      BOLD=$(tput bold)
+			
+			PS1="\[${CYAN}\]\u\[$BASE0\]@\[$CYAN\]\h\[$BASE0\]\:\[$PURPLE\]\w\[$BASE0\]\$([[ -n \$(git branch 2> /dev/null) ]] && echo \" on \")\[$ORANGE\]\$(parse_git_branch)\[$BASE0\]\$ \[$RESET\]"
+    fi
+fi
+
